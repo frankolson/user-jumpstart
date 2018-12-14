@@ -1,0 +1,20 @@
+<div>
+  <%%= link_to <%= index_helper %>_path, class: 'btn btn-default' do %>
+    <i class="fas fa-list-ul"></i>
+    All <%= plural_table_name.capitalize %>
+  <%% end %>
+
+  <%%= link_to edit_<%= singular_table_name %>_path(@<%= singular_table_name %>), class: 'btn btn-primary' do %>
+    <i class="fas fa-pencil-alt"></i>
+    Edit
+  <%% end %>
+
+  <h1>Show <%= singular_table_name %></h1>
+</div>
+
+<div>
+  <% attributes.each do |attribute| %>
+    <strong><%= attribute.human_name %>:</strong>
+    <%%= @<%= singular_table_name %>.<%= attribute.name %> %>
+  <% end %>
+</div>

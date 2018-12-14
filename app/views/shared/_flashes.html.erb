@@ -1,0 +1,11 @@
+<div id="flashes">
+  <% flash.each do |level, msg| %>
+    <%= tag.div class: flash_class(level) do %>
+      <%= msg %>
+
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    <% end %>
+  <% end %>
+</div>
