@@ -1,5 +1,5 @@
 <div>
-  <%%= link_to <%= index_helper %>_path, class: 'btn btn-default' do %>
+  <%%= link_to <%= index_helper %>_path, class: 'btn btn-outline-primary' do %>
     <i class="fas fa-list-ul"></i>
     All <%= plural_table_name.capitalize %>
   <%% end %>
@@ -13,8 +13,8 @@
 </div>
 
 <div>
-  <% attributes.each do |attribute| %>
-    <strong><%= attribute.human_name %>:</strong>
-    <%%= @<%= singular_table_name %>.<%= attribute.name %> %>
-  <% end %>
+<%- attributes.each do |attribute| -%>
+  <strong><%= attribute.human_name %>:</strong>
+  <%%= @<%= singular_table_name %>.<%= attribute.name %> %>
+<%- end -%>
 </div>
