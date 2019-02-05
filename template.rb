@@ -27,16 +27,16 @@ end
 
 def add_gems
   gem 'bootstrap', '~> 4.1', '>= 4.1.3'
-  gem 'administrate', '~> 0.11'
   gem 'name_of_person', '~> 1.0'
   gem 'devise', '~> 4.5'
-  gem 'devise_masquerade', '~> 0.6', '>= 0.6.5'
   gem 'devise-bootstrapped', github: 'king601/devise-bootstrapped', branch: 'bootstrap4'
   gem 'gravatar_image_tag', github: 'mdeering/gravatar_image_tag'
   gem 'font-awesome-sass', '~> 5.5', '>= 5.5.0.1'
   gem 'jquery-rails', '~> 4.3', '>= 4.3.3'
   gem 'sitemap_generator', '~> 6.0', '>= 6.0.1'
   gem 'webpacker', '~> 3.5', '>= 3.5.3'
+  gem 'mini_magick', '~> 4.8'
+  gem 'foreman', '~> 0.85'
 end
 
 def set_application_name
@@ -59,13 +59,7 @@ def add_users
   generate 'devise:views:bootstrapped'
 
   # Create Devise User
-  generate :devise, 'User', 'first_name', 'last_name', 'admin:boolean'
-
-  # Set admin default to false
-  in_root do
-    migration = Dir.glob('db/migrate/*').max_by{ |f| File.mtime(f) }
-    gsub_file migration, /:admin/, ':admin, default: false'
-  end
+  generate :devise, 'User', 'first_name', 'last_name'
 
   requirement = Gem::Requirement.new('> 5.2')
   rails_version = Gem::Version.new(Rails::VERSION::STRING)
@@ -75,9 +69,6 @@ def add_users
       /  # config.secret_key = .+/,
       '  config.secret_key = Rails.application.credentials.secret_key_base'
   end
-
-  # Add Devise masqueradable to users
-  inject_into_file 'app/models/user.rb', 'masqueradable, :', after: 'devise :'
 end
 
 def copy_templates
@@ -87,15 +78,13 @@ def copy_templates
   directory 'lib', force: true
 end
 
+def add_forman
+  copy_file 'Procfile.dev'
+end
+
 def add_doc_routes
   route "get '/terms', to: 'home#terms'"
   route "get '/privacy', to: 'home#privacy'"
-end
-
-def add_bootstrap
-  insert_into_file 'app/assets/javascripts/application.js',
-    "\n//= require jquery\n//= require popper\n//= require bootstrap",
-    after: "//= require rails-ujs"
 end
 
 def add_webpack
@@ -106,30 +95,14 @@ def add_stimulus
   rails_command 'webpacker:install:stimulus'
 end
 
-def add_administrate
-  generate 'administrate:install'
-
-  gsub_file 'app/dashboards/user_dashboard.rb',
-    /email: Field::String/,
-    "email: Field::String,\n    password: Field::String.with_options(searchable: false)"
-
-  gsub_file 'app/dashboards/user_dashboard.rb',
-    /FORM_ATTRIBUTES = \[/,
-    "FORM_ATTRIBUTES = [\n    :password,"
-
-  gsub_file 'app/controllers/admin/application_controller.rb',
-    /# TODO Add authentication logic here\./,
-    "redirect_to root_url, alert: 'Not authorized.' unless user_signed_in? && current_user.admin?"
+def add_bootstrap
+  insert_into_file 'app/assets/javascripts/application.js',
+    "\n//= require jquery\n//= require popper\n//= require bootstrap",
+    after: "//= require rails-ujs"
 end
 
-def add_app_helpers_to_administrate
-  environment do <<-RUBY
-    # Expose our application's helpers to Administrate
-    config.to_prepare do
-      Administrate::ApplicationController.helper #{@app_name.camelize}::Application.helpers
-    end
-  RUBY
-  end
+def add_active_storage
+  rails_command 'active_storage:install'
 end
 
 def add_sitemap
@@ -149,18 +122,16 @@ after_bundle do
   add_users
 
   copy_templates
+  add_forman
   add_doc_routes
   add_webpack
   add_stimulus
   add_bootstrap
+  add_active_storage
 
   # Migrate
   rails_command 'db:create'
   rails_command 'db:migrate'
-
-  # Migrations must be done before this
-  add_administrate
-  add_app_helpers_to_administrate
 
   add_sitemap
 
