@@ -14,7 +14,9 @@
 
 <div>
 <%- attributes.each do |attribute| -%>
-  <strong><%= attribute.human_name %>:</strong>
-  <%%= @<%= singular_table_name %>.<%= attribute.name %> %>
+  <div>
+    <strong><%= attribute.human_name %>:</strong>
+    <%%= @<%= singular_table_name %>.<%= attribute.name %> %>
+  </div>
 <%- end -%>
 </div>
