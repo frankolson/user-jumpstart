@@ -116,11 +116,11 @@ def add_administrate
 
   gsub_file 'app/dashboards/user_dashboard.rb',
     /email: Field::String/,
-    'email: Field::String,\n    password: Field::String.with_options(searchable: false)'
+    "email: Field::String,\n    password: Field::String.with_options(searchable: false)"
 
   gsub_file 'app/dashboards/user_dashboard.rb',
     /FORM_ATTRIBUTES = \[/,
-    'FORM_ATTRIBUTES = [\n    :password,'
+    "FORM_ATTRIBUTES = [\n    :password,"
 
   gsub_file 'app/controllers/admin/application_controller.rb',
     /# TODO Add authentication logic here\./,
