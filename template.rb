@@ -37,6 +37,7 @@ def add_gems
   gem 'webpacker', '~> 3.5', '>= 3.5.3'
   gem 'mini_magick', '~> 4.8'
   gem 'foreman', '~> 0.85'
+  gem 'administrate', '~> 0.11'
 end
 
 def set_application_name
@@ -109,6 +110,31 @@ def add_sitemap
   rails_command 'sitemap:install'
 end
 
+
+def add_administrate
+  generate 'administrate:install'
+
+  gsub_file 'app/dashboards/user_dashboard.rb',
+    /email: Field::String/,
+    'email: Field::String,\n    password: Field::String.with_options(searchable: false)'
+
+  gsub_file 'app/dashboards/user_dashboard.rb',
+    /FORM_ATTRIBUTES = \[/,
+    'FORM_ATTRIBUTES = [\n    :password,'
+
+  gsub_file 'app/controllers/admin/application_controller.rb',
+    /# TODO Add authentication logic here\./,
+    'redirect_to '/', alert: 'Not authorized.' unless user_signed_in? && current_user.admin?'
+
+  environment do <<-RUBY
+    # Expose our application's helpers to Administrate
+    config.to_prepare do
+      Administrate::ApplicationController.helper #{@app_name.camelize}::Application.helpers
+    end
+  RUBY
+  end
+end
+
 def initial_webpack_build
   run 'bin/webpack'
 end
@@ -132,6 +158,9 @@ after_bundle do
   # Migrate
   rails_command 'db:create'
   rails_command 'db:migrate'
+
+  # Migrations must be done before this
+  add_administrate
 
   add_sitemap
 
