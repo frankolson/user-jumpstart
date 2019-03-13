@@ -124,7 +124,7 @@ def add_administrate
 
   gsub_file 'app/controllers/admin/application_controller.rb',
     /# TODO Add authentication logic here\./,
-    'redirect_to '/', alert: 'Not authorized.' unless user_signed_in? && current_user.admin?'
+    "redirect_to '/', alert: 'Not authorized.' unless user_signed_in? && current_user.admin?"
 
   environment do <<-RUBY
     # Expose our application's helpers to Administrate
